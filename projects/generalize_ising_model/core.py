@@ -1,13 +1,13 @@
 import numpy as np
 from numpy.random import permutation, random
 import time
-import multiprocessing
+import multiprocess
 import math
-from .tools.utils import to_find_critical_temperature
+from projects.generalize_ising_model.tools.utils import to_find_critical_temperature
 import warnings
 
 warnings.filterwarnings("ignore")
-n_cpu = multiprocessing.cpu_count() - 1
+n_cpu = multiprocess.cpu_count() - 1
 
 
 # @numba.jit(nopython=True)
@@ -157,7 +157,7 @@ def generalized_ising(Jij, temperature_parameters=(0.1, 5, 100), n_time_points=1
     elif temperature_distribution == 'log':
         ts = np.logspace(temperature_parameters[0],np.log10(temperature_parameters[1]),num=temperature_parameters[2])
 
-    pool = multiprocessing.Pool(n_cpu)
+    pool = multiprocess.Pool(n_cpu)
 
     step_len = math.ceil(temperature_parameters[2] / n_cpu)
     previus = 0
@@ -229,6 +229,18 @@ def generalized_ising(Jij, temperature_parameters=(0.1, 5, 100), n_time_points=1
                 simulated_fc[:, :, results[i, 5]:results[i, 6]] = results[i, 4]
 
             critical_temperature = to_find_critical_temperature(S, ts)
-
-        
             return np.copy(simulated_fc), np.copy(critical_temperature), np.copy(E), np.copy(M), np.copy(S), np.copy(H)
+
+# J = np.array([[0., 0.16069726, 0.32568756, 0.20497754, 0.17010901],[0.16069726, 0., 0.31721317, 0.2493503, 0.32608541],[0.32568756, 0.31721317, 0., 0.55304965, 0.35610558],[0.20497754, 0.2493503, 0.55304965, 0., 1.],[0.17010901, 0.32608541, 0.35610558, 1., 0.]])
+#
+# no_temperatures = 50
+# no_entities = 20
+# no_simulations = 250
+# thermalize_time = 0.3
+#
+# temperature_parameters = (0.005, J.shape[-1] * (np.mean(J) + 0.45))
+#
+# A,B,C,D,E,F = generalized_ising(J, temperature_parameters=(0.1, 5, 100), n_time_points=100, thermalize_time=0.3, temperature_distribution ='lineal', phi_variables = False, return_tc = False, type='digital')
+#
+#
+# print(F)
